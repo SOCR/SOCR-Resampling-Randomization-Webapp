@@ -177,23 +177,24 @@ socr.dataTable = function () {
             }
         },
         request: function (uri) {
-            // Fix for FF 
-
-
+        
             $.get(uri, function (d) {
 
                 var tableCount = $(d).is('table') ? $(d).length : $(d).find('table').length,
                     tables = $(d).is('table') ? $(d) : $(d).find('table'),
                     table = tableparse.filterBySize(tables),
                     titles = tableparse.parseHeadings(table);
+               
                 matrix = tableparse.htmlToArray(table);
-                $dataTable.inputtable({
-                    cols: 2,
+               
+                $dataTable.handsontable({
+                    startCols: 8,
                     minSpareCols: 0
                 })
 
-                var inputMethod = tableparse.mode() === 'sync' ? 'loadDataSwift' : 'loadData';
-                $dataTable.inputtable(inputMethod, matrix);
+                // var inputMethod = tableparse.mode() === 'sync' ? 'loadDataSwift' : 'loadData';
+                $dataTable.handsontable('loadData', matrix);
+
             }).fail(function () {
 
                 view.displayResponse('There was an error loadin the dataset', 'error')
@@ -305,20 +306,21 @@ socr.dataTable = function () {
         },
         editTitles: function () {
 
-            var d = $dataTable.inputtable('getColHeaders');
-            console.log(d)
-            colHeader = d.blockedRows.headers;
+            var colHeader = $dataTable.handsontable('getColHeader');
+                console.log(colHeader);
+            // console.log(d)
+            // colHeader = d.blockedRows.headers;
 
             var content = '<form class="form form-horizontal" id="input-titles"><fieldset><legend>Add titles to Spreadsheet</legend>';
-            if (typeof colHeader[0] !== 'undefined') {
-                for (var i = 0; i < d.colCount; i++) {
-                    var label = (typeof colHeader[0].labels[i] !== 'undefined') ? colHeader[0].labels[i] : '';
-                    content += '<div class="control-group"><label class="control-label">Column ' + i + ' :</label><div class="controls"><input type="text" placeholder="Input field" value="' + label + '"></div></div>';
+            if (colHeader[0] !== '') {
+                for (var i = 0; i < colHeader.length; i++) {
+                    // var label = (colHeader[i] !== '') ?  : '';
+                    content += '<div class="control-group"><label class="control-label">Column ' + i + ' :</label><div class="controls"><input type="text" placeholder="Input field" value="' + colHeader[i] + '"></div></div>';
                 }
             } else {
 
                 var k = 0;
-                while (k < d.colCount) {
+                while (k < colHeader.length) {
                     content += '<div class="control-group"><label class="control-label">Title ' + k + '</label><div class="controls"><input type="text" placeholder="Input field"></div></div>';
                     k++;
                 }
@@ -384,19 +386,24 @@ socr.dataTable = function () {
             /*
       Spreadsheet generation code, pretty much self explanatory
       */
-            $dataTable.inputtable({
-                cols: 8,
-                rows: 8,
+            $dataTable.handsontable({
+                minCols: 8,
+                minRows: 8,
                 minSpareCols: 1,
                 minSpareRows: 1,
                 fillHandle: true,
-                colHeaders: true
+                colHeaders: true,
+                rowHeaders: true,
+                manualColumnResize : true,
+                width: 750,
+                height: 270,
+                outsideClickDeselects : false
             });
 
             //Temporary solution to remove multiple table headers
-            $dataTable.find('tr.htColHeader')[1].remove()
+            // $dataTable.find('tr.htColHeader')[1].remove()
 
-            //    $dataTable.inputtable({colHeaders : true})
+            //    $dataTable.handsontable({colHeaders : true})
         },
 
         validate: function (dataset) {
@@ -421,13 +428,13 @@ socr.dataTable = function () {
         },
 
         addColHeaders: function (arr) {
-            $dataTable.inputtable({
+            $dataTable.handsontable({
                 colHeaders: arr
             });
         },
 
         removeCol : function(index){
-             $dataTable.inputtable('alter', 'remove_col', index);
+             $dataTable.handsontable('alter', 'remove_col', index);
              spreadSheet.refresh();
         },
 
@@ -441,14 +448,14 @@ socr.dataTable = function () {
         },
 
         firstRowTitles: function () {
-            var firstrow = $dataTable.inputtable('getFirstRow')[0];
+            var firstrow = $dataTable.handsontable('getFirstRow')[0];
             spreadSheet.addColHeaders(firstrow);
-            $dataTable.inputtable('alter', 'remove_row', 0);
+            $dataTable.handsontable('alter', 'remove_row', 0);
             view.displayResponse(' Title successfully adjusted ', 'success');
 
         },
         parseAll: function () {
-            var dataset = $dataTable.inputtable('getNonEmptyData');
+            var dataset = $dataTable.handsontable('getNonEmptyData');
             socr.model.reset();
 
             $("#accordion").accordion("activate", 0);
@@ -487,7 +494,7 @@ socr.dataTable = function () {
             // console.log(dataset);
         },
         refresh : function(){
-             $dataTable.inputtable({});
+             $dataTable.handsontable({});
              $dataTable.find('tr.htColHeader')[1].remove()
         },
 
@@ -495,15 +502,18 @@ socr.dataTable = function () {
 
             if (select.isSelected()) {
                 var selectedCoords = select.isSelected();
-                /*
-            Selected Cells:
-           [ startrow , startCol, endRow, endCol ]
-          */
+                
+           //  Selected Cells:
+           // [ startrow , startCol, endRow, endCol ]
+          
             }
-            if (selectedCoords) {
+           // var ht = $dataTable.handsontable('getInstance');
+           //      console.log(ht.getSelected());
+          
+              if (selectedCoords) {
 
                 console.log(' Select Data request with  ' + selectedCoords)
-                var dataset = $dataTable.inputtable('getSelectedData');
+                var dataset = $dataTable.handsontable('getData');
                 $("#accordion").accordion("activate", 0);
                 try {
                     socr.controller.loadController({
@@ -545,7 +555,7 @@ socr.dataTable = function () {
 
         loadData : function(grid){
 
-            $dataTable.inputtable('loadData',grid);
+            $dataTable.handsontable('loadData',grid);
             view.displayResponse('Data loaded','success');
             
         },
@@ -563,13 +573,13 @@ socr.dataTable = function () {
                     buttons: {
                         Yes: function () {
                             //clear the input sheet 
-                            $dataTable.inputtable('clear');
-                            $dataTable.inputtable({
+                            $dataTable.handsontable('clear');
+                            $dataTable.handsontable({
                                 colHeaders: []
                             })
                             $response.html('<div class="alert"><a class="close" data-dismiss="alert" href="#">x</a>Clear! Enter some value to get started!</div>'); //display the message in the status div below the done and reset buttons
                             $(this).dialog("close"); //close the confirmation window
-                            // $dataTable.inputtable({'colHeaders' : false});
+                            // $dataTable.handsontable({'colHeaders' : false});
 
                         },
                         No: function () {
@@ -590,10 +600,10 @@ socr.dataTable = function () {
     var select = {
 
         selectCells: function (coords) {
-            $dataTable.inputtable('selectCell', coords[0], coords[1], coords[2], coords[3]);
+            $dataTable.handsontable('selectCell', coords[0], coords[1], coords[2], coords[3]);
         },
         isSelected: function () {
-            var coords = $dataTable.inputtable('getSelected');
+            var coords = $dataTable.handsontable('getSelected');
             if (coords) {
                 /*
           Simple check for deselected members as the getSelected method returns the coordinates of last cell worked on
@@ -613,7 +623,7 @@ socr.dataTable = function () {
         },
         selectAll: function () {
             console.log('SelectAll member function');
-            $dataTable.inputtable('selectEntiregrid');
+            $dataTable.handsontable('selectEntiregrid');
         }
 
     };
