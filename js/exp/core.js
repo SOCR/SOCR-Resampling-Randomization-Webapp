@@ -231,8 +231,12 @@ function Card(canvas){
 			this.denomination = this.value - 13 * (this.suit - 1);
 			ctx.drawImage(cardImages, (this.denomination - 1) * width, (this.suit - 1) * height, width, height, 0, 0, width, height);
 		}
-		//else if (this.value == 0) ctx.drawImage(cardImages, 2 * width, 4 * height, width, height, 0, 0, width, height);
-		else ctx.clearRect(0, 0, width, height);
+    else if (this.value == 0){
+      ctx.drawImage(cardImages, 2 * width, 4 * height, width, height, 0, 0, width, height);
+    }
+		else{
+      ctx.clearRect(0, 0, width, height);
+    }
 	}
 }
 

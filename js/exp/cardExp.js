@@ -1,5 +1,3 @@
-/*
-
 	Playing Card Experiment
  	Revised from Distributome Card Experiment into a separate module
 
@@ -29,7 +27,6 @@ function _dealCard(){
 	if (_tempK < _K){
 		var _datum=_d[_tempK][_tempN];
 		_hand[_count].setValue(_datum);
-		console.log(typeof _datum);
 		_datasetValues[_tempK][_tempN]=_datasetKeys[_tempK][_tempN]=_datum;
 		_count++;
 		_tempN++;
@@ -125,7 +122,7 @@ return{
 			_d[i] = sample(_deck, _n, 0);		
 			}
 		
-		_stepID = setInterval(_dealCard, 20);
+		_stepID = setInterval(_dealCard, 70);
 	},
 
 	reset:function(){

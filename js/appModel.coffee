@@ -7,16 +7,16 @@ appModel.js is the model object for the SOCR app.
 SOCR - Statistical Online Computational Resource
 ###
 socr.model = ->
-
+  
   #::::::: PRIVATE PROPERTIES :::::::::::::::
-  #Number of runs to be made when 'run' button is pressed
+  #Number of runs to be made when 'run' button is pressed 
   #keeps count of number of samples generated from start
   #Number of datapoints in a bootstrap sample or Sample Size
   #contains the number of datasets
   #
   # Why there are keys and values? Its because in some form of data input (like coin toss), the "key" contains the symbolic meaningful reference whereas the "value" contains the mathematical equivalent value.
-  #
-
+  # 
+  
   #::::::: PRIVATE METHODS :::::::::::::::
   ###
   @method : _getRandomInt()
@@ -26,7 +26,7 @@ socr.model = ->
   ###
   _getRandomInt = (min, max) ->
     Math.floor(Math.random() * (max - min)) + min
-
+  
   ###
   @method : _generateMean
   @param  : {number|string} sampleNumber - the random sample number for which the mean is to be calculated
@@ -52,7 +52,7 @@ socr.model = ->
     else
       total = _generateCount(sampleNumber, groupNumber)
       total / socr.dataStore.bootstrapGroup[sampleNumber].values.getData(groupNumber).length
-
+  
   ###
   @method : _generateCount
   @param  : sampleNumber - the random sample number for which the count is to be calculated
@@ -69,7 +69,7 @@ socr.model = ->
       total += parseFloat(x[i])
       i++
     total
-
+  
   ###
   @method : _generateStandardDev
   @param  : sampleNumber , groupNumber
@@ -77,7 +77,7 @@ socr.model = ->
   @return : {number} standard deviation for the input sample and group numbers
   ###
   _generateStandardDev = (sampleNumber, groupNumber) ->
-
+    
     #formula used here is SD= ( E(x^2) - (E(x))^2 ) ^ 1/2
     _mean = _generateMean(sampleNumber, groupNumber) #E(x)
     _squaredSum = null #stores E(x^2)
@@ -88,11 +88,11 @@ socr.model = ->
       _squaredSum += _sample[i] * _sample[i]
       i++
     _squaredSum = _squaredSum / _sample.length
-
+    
     #console.log("_squaredSum"+_squaredSum+"--- _mean:"+_mean);
     _SD = Math.sqrt(_squaredSum - (_mean) * (_mean))
     _SD
-
+  
   ###
   @method  : _generateF
   @desc   : Generates the F value using the one way ANOVA method
@@ -111,7 +111,7 @@ socr.model = ->
       _ssb = 0
       _data = []
       if sampleNumber is "dataset"
-
+        
         #Get the complete dataset from the dataStore.
         i = 0
 
@@ -119,8 +119,8 @@ socr.model = ->
           _data[i] = socr.dataStore.dataset[i].values.getData()
           i++
       else
-
-        #Get the random sample with index @sampleNumber from each group.
+        
+        #Get the random sample with index @sampleNumber from each group. 
         _data = socr.dataStore.bootstrapGroup[sampleNumber].values.getData()
       i = 0
       while i < _K
@@ -129,15 +129,15 @@ socr.model = ->
         _total += _ymean[i]
         i++
       _y = _total / _K # grand mean
-
+      
       #Degree of freedom between = _dofe = K - 1
       _dofe = _K - 1
-
+      
       #Degree of freedom within = _dofw = N - K
       _dofw = _N - _K
-
+      
       #Sum of Squares Total (= Sum of squares between + Sum of squares within)
-
+      
       #Creating the samplespace of all values.
       _sspace = []
       i = _K - 1
@@ -145,7 +145,7 @@ socr.model = ->
       while i >= 0
         _sspace = _sspace.concat(_data[i])
         i--
-
+      
       #Mean
       _m = $.mean(_sspace)
       i = _sspace.length - 1
@@ -153,9 +153,9 @@ socr.model = ->
       while i >= 0
         _sst = _sst + Math.pow((_m - _sspace[i]), 2)
         i--
-
+      
       #console.log("_sst:"+_sst);
-
+      
       #SSW - Sum of squares within
       i = 0
       _temp = 0
@@ -168,9 +168,9 @@ socr.model = ->
           _ssw += _temp * _temp
           j++
         i++
-
+      
       #console.log("_ssw:"+_ssw);
-
+      
       #SSB - Sum of squares between
       # for (var i = _K; i >= 1; i--) {
       #   if ((d = _data[i].length) !== undefined){
@@ -179,16 +179,16 @@ socr.model = ->
       # };
       #console.log("_ssb:"+_ssb);
       _ssb = _sst - _ssw
-
+      
       #MST - Mean sum of squares
       _mst = _ssb / _dofe
-
+      
       #MSE - Mean sum of between
       _msw = _ssw / _dofw
       fValue: _mst / _msw
       ndf: _dofe
       ddf: _dofw
-
+  
   ###
   @method : _generateP
   @desc   :Generates p value for the "k" data groups using one way ANOVA method.
@@ -202,7 +202,7 @@ socr.model = ->
     _ndf = _ndf or x.ndf
     _ddf = _ddf or x.ddf
     socr.tools.fCal.computeP x.fValue, _ndf, _ddf
-
+  
   ###
   @method  : _generateZ
   @desc   :Generates p value for the "k" data groups using difference of proportion test.
@@ -217,28 +217,28 @@ socr.model = ->
       _data1 = socr.dataStore.bootstrapGroup[sampleNumber].values.getData()
       _data2 = _data1[2]
       _data1 = _data1[1]
-
+    
     #
     #      p1 - Proportion of dataset 1
     #      p2 - Proportion of dataset 2
     #
     #      Z = (p1 - p1)/(p*(1-p))*((1/n1) + (1/n2)))^1/2
-    #      Reference :
+    #      Reference : 
     #       - http://wiki.stat.ucla.edu/socr/index.php/AP_Statistics_Curriculum_2007_Infer_2Proportions#Hypothesis_Testing_the_Difference_of_Two_Proportions
     #       - http://stattrek.com/hypothesis-test/difference-in-proportions.aspx
-    #
+    #    
     n1 = _data1.length
     p1 = $.sum(_data1) / n1
     n2 = _data2.length
     p2 = $.sum(_data2) / n2
-
+    
     #Generate pooled sample proportions
     p = (p1 * n1 + p2 * n2) / (n1 + n2)
-
+    
     #Generate Standard Error
     SE = Math.sqrt(p * (1 - p) * ((1 / n1) + (1 / n2)))
     zValue: (p1 - p2) / SE
-
+  
   ###
   @desc Generates p value for the "k" data groups using difference of proportion.
   @param sampleNumber
@@ -261,7 +261,7 @@ socr.model = ->
   _K = null
   _this = this
   n: _n
-
+  
   ###
   @method: [public] generateTrail()
   @param datasetIndex
@@ -277,8 +277,8 @@ socr.model = ->
       key: _temp.keys.getData(randomIndex)
       value: _temp.values.getData(randomIndex)
 
-  #returning the generated trail into a bootstrap sample array
-
+  #returning the generated trail into a bootstrap sample array  
+  
   ###
   @method [public] generateSample()
   @desc  generating a random number between 0 and dataSet size
@@ -290,9 +290,9 @@ socr.model = ->
     valEl = []
     i = 0
     while i < k
-
+      
       #EDIT THIS TO MAKE N DYNAMIC
-
+      
       #var j = _n[k];
       j = socr.model.getN()[i]
       sample = []
@@ -306,13 +306,13 @@ socr.model = ->
       i++
     socr.dataStore.createObject "bootstrapGroup." + _count + ".keys", keyEl
     socr.dataStore.createObject "bootstrapGroup." + _count + ".values", valEl
-
+    
     #Object.defineProperty(_bootstrapGroupKeys,_count,{value:keyEl,writable:true,configurable : true});
     #Object.defineProperty(_bootstrapGroupValues,_count,{value:valEl,writable:true,configurable : true});
     _count++ #incrementing the total count - number of samples generated from start of simulation
     true
 
-
+  
   ###
   @method getMean()
   @desc  executed when the user presses "infer" button in the controller tile. The click binding of the step button is done in the {experiment}.js
@@ -335,7 +335,7 @@ socr.model = ->
       obj.setData _mean
       obj.getData()
 
-
+  
   ###
   @method getMeanOf()
   @desc  executed when the user presses "infer" button in the controller tile.
@@ -347,11 +347,11 @@ socr.model = ->
   getMeanOf: (sampleNumber, groupNumber) ->
     _generateMean sampleNumber, groupNumber
 
-
+  
   ###
   STANDARD DEVIATION METHODS STARTS *
   ###
-
+  
   ###
   @method getStandardDev
   @param groupNumber
@@ -370,12 +370,12 @@ socr.model = ->
       while j < _count
         _temp[j] = _generateStandardDev(j, groupNumber)
         j++
-
+      
       #console.log(_sampleStandardDev[j]);
       _sample.StandardDev[groupNumber] = _temp
       _sample.StandardDev[groupNumber]
 
-
+  
   ###
   @method getStandardDevOf
   @param sampleNumber
@@ -385,7 +385,7 @@ socr.model = ->
   getStandardDevOf: (sampleNumber, groupNumber) ->
     _generateStandardDev sampleNumber, groupNumber
 
-
+  
   ###
   @param K
   @returns {number}
@@ -406,15 +406,15 @@ socr.model = ->
     console.log "SD of Dataset:" + _SD
     _SD
 
-
+  
   ###
   STANDARD DEVIATION METHODS ENDS *
   ###
-
+  
   ###
   COUNT METHODS STARTS *
   ###
-
+  
   ###
   @method getCount
   @param groupNumber
@@ -436,7 +436,7 @@ socr.model = ->
       obj.setData _c
       obj.getData()
 
-
+  
   ###
   @method getCountOf
   @param {number | string}sampleNumber
@@ -458,15 +458,15 @@ socr.model = ->
     else
       _generateCount sampleNumber, K
 
-
+  
   ###
   COUNT METHODS ENDS *
   ###
-
+  
   ###
   PERCENTILE METHODS STARTS *
   ###
-
+  
   ###
   @method getPercentile ()
   @param  pvalue - what is the percentile value that is to be calculated.
@@ -474,7 +474,7 @@ socr.model = ->
   ###
   getPercentile: (pvalue) ->
     console.log "getPercentile() invoked"
-
+    
     #if(_samplePercentile.length==bootstrapSampleValues.length)
     #   return _samplePercentile;
     #else
@@ -484,13 +484,13 @@ socr.model = ->
     while j < _count
       _sample.Percentile[j] = @getPercentileOf(j, pvalue)
       j++
-
+    
     #console.log(_samplePercentile[j]);
     _sample.Percentile
 
-
+  
   # }
-
+  
   ###
   @method getPercentileOf
   @param sampleNumber
@@ -502,12 +502,12 @@ socr.model = ->
       a - b
     )
     position = Math.floor(bootstrapSampleValues[sampleNumber].length * (pvalue / 100))
-
+    
     #console.log(pvalue);
     #console.log(bootstrapSampleValues[sampleNumber]+"---"+position);
     temp[position]
 
-
+  
   ###
   @param pvalue
   @returns {*}
@@ -519,11 +519,11 @@ socr.model = ->
     position = Math.floor(_datasetValues.length * (pvalue / 100))
     temp[position]
 
-
+  
   ###
   PERCENTILE METHODS ENDS *
   ###
-
+  
   ###
   @method getF
   @desc returns the F value computed from the supplied group
@@ -546,7 +546,7 @@ socr.model = ->
       obj.setData _f
       obj.getData()
 
-
+  
   ###
   @method  getFof
   @desc returns the F value computed from the supplied group
@@ -554,13 +554,13 @@ socr.model = ->
   @returns {Object}
   ###
   getFof: (sampleNumber) ->
-
+    
     #check if K > 1 and there are random samples to compute F.
     return false  if socr.model.getK() <= 1 or socr.dataStore.bootstrapGroup is `undefined`
     _this = this
     _generateF sampleNumber
 
-
+  
   ###
   @method getP
   @return {Object}
@@ -582,20 +582,20 @@ socr.model = ->
       obj.setData _p
       obj.getData()
 
-
+  
   ###
   @method getPof
   @param sampleNumber
   @returns {number}
   ###
   getPof: (sampleNumber) ->
-
+    
     #check if K > 1 and there are random samples to compute P.
     return false  if socr.model.getK() <= 1 and socr.dataStore.bootstrapGroup is `undefined`
     _this = this
     _generateP sampleNumber
 
-
+  
   ###
   @method getDOP
   @return {Object}
@@ -616,7 +616,7 @@ socr.model = ->
       obj.setData _p
       obj.getData()
 
-
+  
   ###
   @method getDOPof
   @param sampleNumber
@@ -626,7 +626,7 @@ socr.model = ->
     _this = this
     _generateDOP sampleNumber
 
-
+  
   ###
   @method getDataset
   @desc  getter function for dataSet variable.
@@ -644,7 +644,7 @@ socr.model = ->
       return false
     return
 
-
+  
   ###
   @method setDataset
   @desc sets the data from the input sheet into the app model
@@ -652,10 +652,10 @@ socr.model = ->
   @return {boolean}
   ###
   setDataset: (input) ->
-
+    
     #check for input values...if its empty...then throw error
     return false if typeof input isnt "object"
-
+    
     #input.processed is true in case of a simulation -> data mode switch
     if input.processed
       ma1 = []
@@ -676,7 +676,7 @@ socr.model = ->
     else if input.type is "spreadsheet"
       ma1 = []
       ma2 = []
-
+      
       #clear previous data.
       socr.dataStore.removeObject "dataset"
       #console.log input.values.length
@@ -684,7 +684,7 @@ socr.model = ->
 
       while i < input.values.length
         _cells = input.values[i].cells
-        _id = input.values[i].id - 1
+        _id = input.values[i].id
         _temp = []
         j = 0
 
@@ -703,7 +703,7 @@ socr.model = ->
       else
         true
 
-
+  
   ###
   @method : getSample
   @param  : index  random sample index
@@ -722,7 +722,7 @@ socr.model = ->
     else
       _bg.keys.getData K
 
-
+  
   ###
   @method - getSamples
   @param type
@@ -749,12 +749,12 @@ socr.model = ->
         i++
     _temp
 
-
+  
   ###
   getter and setter for variable '_stopCount'
   ###
   setStopCount: (y) ->
-
+    
     #alert(y);
     _stopCount = y
     return
@@ -762,22 +762,22 @@ socr.model = ->
   getStopCount: ->
     _stopCount
 
-
+  
   ###
   getter and setter for variable '_n'
   ###
   setN: (z) ->
-
+    
     #NEED TO MAKE N DYNAMIC
-
+    
     #if z length != to dataset length, then default the values to the dataset lengths
-
+    
     #purge _n array
     _n.length = 0
     socr.model.setK()
     _ds = socr.dataStore.dataset
     if typeof z is "undefined" or z is null
-
+      
       #computing default values
       if typeof _ds isnt "undefined"
         i = 0
@@ -797,7 +797,7 @@ socr.model = ->
         ), z
         _n = _n.concat(z)
       else
-
+    
     #some values are missing
     #this case will come almost never
     else if typeof z is "number" or typeof z is "string"
@@ -814,7 +814,7 @@ socr.model = ->
   getN: ->
     _n
 
-
+  
   ###
   getter and setter for variable '_count'
   ###
@@ -825,26 +825,25 @@ socr.model = ->
   getRSampleCount: ->
     _count
 
+  ###
+  # App goes back to pristine state.
+  ###
   reset: (option) ->
     if option isnt "undefined" and option is "samples"
       socr.dataStore.removeObject "bootstrapGroup"
-
-      #setting the global random sample count to 0
-      socr.model.setRSampleCount 0
+      
     else
-
+      
       #all values deleted
       socr.dataStore.removeObject "all"
-
-      #setting the global random sample count to 0
-      socr.model.setRSampleCount 0
-
-      #setting K and n to 0.
+      #reset K
       socr.model.setK()
-      socr.model.setN()
-    return
+      
+    #setting the global random sample count to 0
+    socr.model.setRSampleCount 0
+    return true
 
-
+  
   ###
   @method :setK
   @return : none
@@ -859,7 +858,7 @@ socr.model = ->
     _K = _c
     return
 
-
+  
   ###
   @method :getK
   @return : {number}

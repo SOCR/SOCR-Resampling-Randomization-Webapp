@@ -6,12 +6,12 @@ appView.js is the view object for the SOCR app.
 SOCR - Statistical Online Computational Resource
 ###
 socr.view = (model) ->
-
-  # private properties
+  
+  # private properties 
   # [OBJECT] Reference to the App's model object.
   # [ARRAY] Reference to current inference varaible [mean , SD , count , percentile]
   # [ARRAY] Reference to current inference variable's value of each random sample.
-
+  
   ###
   @method: [private] _create
   @param :  start: the first sample number to be displayed
@@ -27,7 +27,7 @@ socr.view = (model) ->
     return false  if size is `undefined` or start is `undefined`
     console.log "_create(" + start + "," + size + ") function started"
     $("#sampleList").html "" #first empty the sample list
-
+    
     #generate the json object for mustache
     config = entries: []
     obj = {}
@@ -55,19 +55,19 @@ socr.view = (model) ->
     $.get "partials/sampleList.tmpl", (data) ->
       temp = Mustache.render(data, config)
       $("#sampleList").html temp
-
+      
       #console.log(temp);
       $(".tooltips").tooltip()
       $(".nav-tabs li").click (e) ->
         e.preventDefault()
         kIndex = $(this).find("a").html()
-
+        
         #setting the k-index attribute of toggle-sample icon
         $(this).parent().parent().find(".toggle-sample").attr "k-index", kIndex
         $(this).find("a").tab "show"
         return
 
-
+      
       #plot icon present on each child of the sampleList Div .
       #            It basically opens a popup and plots a bar chart of that particular sample.
       $(".plot").on "click", (e) ->
@@ -75,7 +75,7 @@ socr.view = (model) ->
         $(".chart").html ""
         id = $(this).attr("sample-number")
         kIndex = $(this).parent().parent().find(".toggle-sample").attr("k-index")
-
+        
         #var sampleID=e.target.id;
         values = model.getSample(id, "values", kIndex)
         i = 0
@@ -83,7 +83,7 @@ socr.view = (model) ->
         while i < values.length
           values[i] = parseFloat(values[i])
           i++
-
+        
         #console.log("values for plot click:"+values);
         #var temp=values.sort(function(a,b){return a-b});
         #var start=Math.floor(temp[0]);
@@ -99,14 +99,14 @@ socr.view = (model) ->
 
         return
 
-
+      
       #range:[start,stop]
       #click binding for .plot
-
+      
       # toggle-sample icon is present on each child of the sampleList Div .
       #             * It basically toggles the data if the sample and sampleValue are different.
       #             * TODO : disable this button if the app is data driven mode (as the sample and sampleValues are same.)
-      #
+      #             
       $(".toggle-sample").on "click", (e) ->
         e.preventDefault()
         id = $(this).attr("sample-number")
@@ -125,11 +125,11 @@ socr.view = (model) ->
     #click binding for .toggle-sample
     #get call end
     $(".contribution").on "click", (e) ->
-
+      
       #
-      #      Renders the dotplot,
+      #      Renders the dotplot, 
       #        @ToDo : show individual contributions on a box chart
-      #
+      #      
       createDotplot = (setting) ->
         if setting.variable is "mean"
           values = model.getMean()
@@ -141,14 +141,14 @@ socr.view = (model) ->
           console.log "SD Values:" + values
         else
           values = model.getPercentile()
-
+        
         #var datum=model.getStandardDevOfDataset();
         datum = Math.floor(datum * 100) / 100
         histogram = socr.vis.generate(
           parent: "#dotplot"
           data: values
           height: 390
-
+          
           #range: [0,10],
           datum: datum
           sample: setting.sample
@@ -174,7 +174,7 @@ socr.view = (model) ->
       return
 
     return
-
+  
   ###
   @method: [private] _createPagination
   @param :  x: the first sample number to be displayed
@@ -213,7 +213,7 @@ socr.view = (model) ->
   _currentVariable = undefined
   _currentValues = undefined
   _currentExperiment = null
-
+  
   ###
   @method - toggleControllerHandle
   @description - Method to toggle the controller slider
@@ -234,7 +234,7 @@ socr.view = (model) ->
       return
 
     hide = ->
-
+      
       # if($target.hasClass('active')){
       $target.removeClass("active").animate
         left: -425
@@ -260,7 +260,7 @@ socr.view = (model) ->
       false
     return
 
-
+  
   ###
   @method - disableButtons()
   @description: Disables step,run and show buttons
@@ -273,7 +273,7 @@ socr.view = (model) ->
     $("#showButton").attr "disabled", "true"
     return
 
-
+  
   ###
   @method - enableButtons()
   @description: Enables step,run and show buttons
@@ -286,19 +286,19 @@ socr.view = (model) ->
     $("#showButton").removeAttr "disabled"
     return
 
-
+  
   ###
   @method - reset()
   @description: Clears all canvas and div. Resetting the view of the whole App
   @dependencies : none
   ###
   reset: (option) ->
-
+    
     #reset only the samples in the view.
     if option isnt "undefined" and option is "samples"
       $("#sampleList").html ""
     else
-
+      
       #$('#displayCount').html('0');  //resetting the count to 0
       $("#sampleList").html "" #clear the sample List dive
       $("#showCount").html ""
@@ -309,13 +309,13 @@ socr.view = (model) ->
       $(".pagination").html ""
       $("#details").html ""
       $("#dataset").html ""
-
-      # $("#input").inputtable('clear');
+      
+      # $("#input").inputtable('clear'); 
       _currentValues = []
-      $("#controller-content").html "<div class=\"alert alert-error\">From the \"data driven\" tab select an experiment  or enter data the spreadsheet first!</div>"
+      $("#controller-content").html "<div class=\"alert alert-error\">Choose a experiment from \"simulation drive\" or enter data in the \"data drive\" first!</div>"
     return
 
-
+  
   ###
   Dont know where its called?
   ###
@@ -334,7 +334,7 @@ socr.view = (model) ->
     )
     return
 
-
+  
   ###
   @method : createList(range)
   @param :start- start sample number
@@ -344,10 +344,10 @@ socr.view = (model) ->
   ###
   createList: (start, end) ->
     console.log "createList(" + start + "," + end + ") invoked "
-
-    #if(Object.getOwnPropertyNames(model.bootstrapGroupKeys).length === 0){
+    
+    #if(Object.getOwnPropertyNames(model.bootstrapGroupKeys).length === 0){ 
     if socr.model.getRSampleCount() is 0
-
+      
       # if no random samples have been generated, display a alert message!
       $("#sampleList").html "<div class=\"alert alert-error\"><a class=\"close\" data-dismiss=\"alert\" href=\"#\">x</a><h4 class=\"alert-heading\">No Random samples to show!</h4>Please generate a dataset using the list of experiments or manually enter the data. Then generate some random samples from the controller tile before click \"show\"</div>"
     else
@@ -359,23 +359,23 @@ socr.view = (model) ->
       PubSub.publish "Sample List generated"
     return
 
-
+  
   ###
   @method : updateSlider()
   @description:update the slider value
   @dependencies : none
   ###
   updateSlider: ->
-
+    
     #get the count and set it as the maximum value
     $("#displayCount").text model.getRSampleCount()
     $("#range").slider "option", "max", model.getRSampleCount()
     $("#range").slider "option", "min", 0
     return
 
-
+  
   #$( "#showCount" ).html($( "#range" ).slider( "values",0 )+" - " + $( "#range" ).slider( "values", 1 ) );
-
+  
   ###
   @method : createShowSlider()
   @description:Create the slider for show option
@@ -399,18 +399,18 @@ socr.view = (model) ->
     $("#showCount").html $("#range").slider("values", 0) + " - " + $("#range").slider("values", 1)
     return
 
-
+  
   ###
   @method: createControllerView
   @description: called for replacing the controller div with data driven controls.
   @return : none
   ###
   createControllerView: ->
-
+    
     #get the random sample length
-    #slice(0) does a shallow copy
+    #slice(0) does a shallow copy 
     _RSampleLength = socr.model.getN().slice(0)
-
+    
     #splice the first element
     _RSampleLength.splice 0, 1
     _k = socr.model.getK()
@@ -449,7 +449,7 @@ socr.view = (model) ->
 
     return
 
-
+  
   ###
   @method: animate
   @param: setting
@@ -457,16 +457,16 @@ socr.view = (model) ->
   @return : none
   ###
   animate: (setting) ->
-
+    
     # Add the class ui-state-disabled to the headers that you want disabled
-
+    
     # Now the hack to implement the disabling functionnality
-
+    
     #disable the back button in the controller tile
     # data is in the form of an array!
     # data is in the form of an array!
     # Number of datapoints in a generated random sample
-    # keys=array indexs of the datapoints in the dataset which are present in the current random sample
+    # keys=array indexs of the datapoints in the dataset which are present in the current random sample 
     #first call
     animation = ->
       speed = $("#speed-value").html() #calculate the speed currently set from the browser itself
@@ -480,11 +480,11 @@ socr.view = (model) ->
       currentY = $("#device" + sampleNumber + "-container").position().top #get the Y position of current sample canvas
       console.log "currentY:" + currentY
       samplesInRow = $("#generatedSamples").width() / _dimensions["width"] - 1 #number of samples in a row
-
+      
       #Block to adjust the generatedSamples div height
       divHeight = (stopCount / samplesInRow) * _dimensions["height"]
       $("#generatedSamples").height divHeight
-
+      
       #alert(divHeight);
       #
       if count < samplesInRow
@@ -494,7 +494,7 @@ socr.view = (model) ->
       console.log "destinationX:" + destinationX
       destinationY = Math.floor(count / samplesInRow) * _dimensions["height"] + $("#generatedSamples").position().top #calculate the destination Y
       console.log "destinationY:" + destinationY
-
+      
       #self.css('-webkit-transition','all 0.5s');
       self.transition
         perspective: "100px"
@@ -514,7 +514,7 @@ socr.view = (model) ->
         else if socr.exp.current.type is "card"
           k = new Card(document.getElementById("device" + sampleNumber))
           k.setValue data[sampleNumber]
-
+        
         #alert(data[sampleNumber]);
         else
           k = new Ball(document.getElementById("device" + sampleNumber))
@@ -548,7 +548,7 @@ socr.view = (model) ->
     setTimeout animation
     return
 
-
+  
   ###
   @method: createDotPlot
   @description: Dot plot tab in the accordion is populated by this call.
@@ -559,17 +559,17 @@ socr.view = (model) ->
     return false  unless setting.variable?
     _currentVariable = setting.variable
     $("#accordion").accordion "activate", 2
-
+    
     # Function to get the Max value in Array
     Array.max = (array) ->
       Math.max.apply Math, array
 
-
+    
     # Function to get the Min value in Array
     Array.min = (array) ->
       Math.min.apply Math, array
 
-
+    
     #setting.variable;
     switch setting.variable
       when "Mean"
@@ -584,14 +584,14 @@ socr.view = (model) ->
       when "percentile"
         try
           pvalue = parseInt($("#percentile-value").html())
-
+        
         #console.log(pvalue);
         catch err
           console.log "unable to read the percentile value from DOM. setting default value to 50%"
           pvalue = 50
         values = model.getPercentile(pvalue)
         datum = model.getPercentileOfDataset(pvalue)
-
+        
         #var datum=model.getStandardDevOfDataset();
         console.log "Percentile Values:" + values
       when "Count"
@@ -601,41 +601,41 @@ socr.view = (model) ->
       when "F-Value"
         values = model.getF()
         datum = model.getFof("dataset").fValue
-
+      
       #console.log("F-values"+values);
       when "P-Value"
         values = model.getP()
         datum = model.getPof("dataset")
-
+      
       #                console.log("P values"+values);
       when "Difference-Of-Proportions"
         values = model.getDOP()
         datum = model.getDOPof("dataset")
-
+      
       #console.log("DOP values"+values);
       else
         values = model.getMean(setting.index)
         datum = model.getMeanOf("dataset", setting.index)
-
+    
     #console.log(values);
-
-    #
+    
+    # 
     #   Cleaning the NaN values generated.
     #   Temporary fix. Need to avoid NaN generation.
-    #
+    #   
     $.grep values, (a) ->
       not isNaN(a)
 
-
-    # Sorting the array to find start and stop values
+    
+    # Sorting the array to find start and stop values 
     temp = values.sort((a, b) ->
       a - b
     )
     start = Math.floor(temp[0])
     stop = Math.ceil(temp[values.length - 1])
     console.log "start: " + start + " stop: " + stop
-
-    # Percentage on the right and left side of the intial dataset contribution point.
+    
+    # Percentage on the right and left side of the intial dataset contribution point. 
     if setting.variable is "P-Value" or setting.variable is "Difference-Of-Proportions"
       total = temp.length
       lSide = undefined
@@ -666,10 +666,10 @@ socr.view = (model) ->
       console.log "index: " + index
       console.log "R Side : " + rSide + ".... L Side : " + lSide
     binNo = (if $("input[name=\"binno\"]").val() isnt "" then $("input[name=\"binno\"]").val() else 10)
-
+    
     #datum = Math.floor(datum*100) / 100;
     _currentValues = values
-
+    
     try
       dotplot = socr.vis.generate(
         parent: "#dotplot"
@@ -686,7 +686,7 @@ socr.view = (model) ->
         pr: rSide
         precision:setting.precision
       )
-
+    
     # nature: 'continuous'
     catch e
       console.log e
@@ -701,9 +701,9 @@ socr.view = (model) ->
         bins: binNo
         variable: setting.variable
       )
-
+    
     # nature: 'continuous'
-
+    
     #        try{
     #   socr.vis.addBar({
     #       elem: dotplot,
@@ -724,7 +724,7 @@ socr.view = (model) ->
     @updateCtrlMessage "Infer plot created.", "success"
     true
 
-
+  
   ###
   @method updateSimulationInfo
   @desc Called when the 'step button' or 'run button' is pressed in the controller tile.
@@ -745,7 +745,7 @@ socr.view = (model) ->
       results: []
       rCount: model.getRSampleCount()
 
-
+    
     #adding results
     if config.k > 1
       if socr.model.getPof("dataset") isnt false
@@ -767,7 +767,7 @@ socr.view = (model) ->
       obj.number = i
       config.groups.push obj
       i++
-
+    
     #console.log(config);
     $.get "partials/info.tmpl", (data) ->
       temp = Mustache.render(data, config)
@@ -776,24 +776,24 @@ socr.view = (model) ->
 
     return
 
-
+  
   ###
   @method: CoverPage
   @description: Called from the index.html page. Called whenever the window is resized!
   @return : none
   ###
   CoverPage: ->
-
+    
     #console.log('CoverPage() invoked!');
     height = $(document).height()
     width = $(window).width()
     $("#welcome").css "height", height
     return
 
-
+  
   # $('.welcome-container').css('padding-top',height/3).css('padding-left', height/3);
   # $('#main').show();
-
+  
   ###
   @method: loadInputSheet
   @description: Called from the {experiment}.js at the {Experiment}.generate() function.
@@ -803,11 +803,11 @@ socr.view = (model) ->
     console.log "loadInputSheet() has been called....data is : " + data
     return
 
-
+  
   #
   #     Temporarily disabling it, I think we should leave the input matrix for data driven purposes only, perhaps the right place would be in the simulation info
-  #
-
+  #   
+  
   #$('#input').inputtable('loadData',data);
   handleResponse: (content, type, id) ->
     console.log "handleResponse"
@@ -816,7 +816,7 @@ socr.view = (model) ->
       console.log $("#" + id)
       $("#" + id).append "<div id='" + id + "-message'></div>"
       $response = $("#" + id + "-message")
-
+    
     #$response=$("#"+id+"-message") || $("#"+id).append("<div id='"+id+"-message'></div>");
     console.log $response
     $response.html("").slideUp 300
@@ -879,5 +879,5 @@ socr.view = (model) ->
 #   console.log("value: "+_currentValues[Math.floor(index)]);
 #   return _currentValues[Math.floor(index)];
 # }
-#
+# 
 #return

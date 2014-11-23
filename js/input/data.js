@@ -163,7 +163,10 @@ socr.dataTable = function () {
             return false;
         },
         notify: function () {
-            view.displayResponse('Dataset Request Initialized..give us few second.', 'success');
+            view.displayResponse('Dataset Request Initialized', 'success');
+            setTimeout(function () {
+                $response.slideToggle().html('');
+            }, 2000);
         },
         checkRefer: function (url) {
             var requestHost = document.createElement("a");
@@ -178,18 +181,9 @@ socr.dataTable = function () {
             }
         },
         request: function (uri) {
-           console.log(uri); 
+        
             $.get(uri, function (d) {
-                d = JSON.parse(d);
-                if(typeof d.status !== 'undefined' && d.status == 'failed'){
-                  view.displayResponse('There was no valid table in the input URL.', 'error');
-                  return false;
-                }
-                view.displayResponse('Done!', 'success');
-                setTimeout(function () {
-                  $response.slideToggle().html('');
-                }, 2000);
-                d = d.data;
+
                 var tableCount = $(d).is('table') ? $(d).length : $(d).find('table').length,
                     tables = $(d).is('table') ? $(d) : $(d).find('table'),
                     table = tableparse.filterBySize(tables),
@@ -403,8 +397,8 @@ socr.dataTable = function () {
                 colHeaders: true,
                 rowHeaders: true,
                 manualColumnResize : true,
-                width: 700,
-                height: 320,
+                width: 750,
+                height: 270,
                 outsideClickDeselects : false,
                 contextMenu:true
             });

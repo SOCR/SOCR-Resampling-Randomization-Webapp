@@ -55,5 +55,4 @@ module.exports = (grunt) ->
   grunt.registerTask "build" , ["coffee","concat"]
   grunt.registerTask "compile", ["coffee"]
   grunt.registerTask "test", ["coffee","jasmine"]
-  grunt.registerTask "default", ["coffee","concat"]
 

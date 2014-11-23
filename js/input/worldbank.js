@@ -34,7 +34,6 @@ socr.input.worldbank = function(){
 					request(req, count);
 				}
 				else{
-					console.log(res, interval);
 					var interval = parseInt(requestdata["date"].substr(5,9)) - parseInt(requestdata["date"].substr(0,4)) + 1;
 					var grid = formatResponse(res, interval);
 					socr.dataTable.worldbank.loadComplete();
@@ -94,17 +93,15 @@ socr.input.worldbank = function(){
 				row = [];
 
 			row.push(country);
-			var flag = 1;
+
 			for(var j = 0 ; j < yearinterval;  j++){
-				if(response[1][i+j].value > 0){
-				  row.push(response[1][i+j].value);
-				  flag = 0;
-				}
+			
+				row.push(response[1][i+j].value);
 
 			}
-			if(flag == 0)
-				table.push(row);
 
+			table.push(row);
+			
 			i += yearinterval;
 		}
 

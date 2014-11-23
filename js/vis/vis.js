@@ -289,7 +289,7 @@ socr.vis = (function(){
 	    g.select(".y.axis")
 	        .call(yAxis);
 
-	   if(typeof settings.datum != undefined){
+	   if(typeof settings.datum != "undefined"){
 
 		     	addBar();
 
