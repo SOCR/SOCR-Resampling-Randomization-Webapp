@@ -1,7 +1,7 @@
 {
-  "author": "Selvam Palanimalai,Ashwini Khare <selvam1991@gmail.com>",
+  "author": "Selvam Palanimalai <selvam.palanimalai@gmail.com>,Ashwini Khare <khare.ashwini@gmail.com>",
   "scripts": {
-    "start": "node server.js",
+    "start": "python -m SimpleHTTPServer 8000",
     "test":"grunt test"
   },
   "version": "0.1.0-3",
