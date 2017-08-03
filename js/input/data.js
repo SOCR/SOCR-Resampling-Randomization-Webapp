@@ -31,31 +31,28 @@ socr.dataTable = function () {
         case 'spreadsheet':
             view.toggleScreens({
                 visible: excelScreen
-            })
+            });
             break;
         case 'fetch':
             view.toggleScreens({
                 visible: [excelScreen, importScreen]
-            })
+            });
             $urlbox.focus();
             break;
         case 'worldbank':
             view.toggleScreens({
                 visible: worldbankContainer
-            })
+            });
             break;
         default:
             simulationDriven.init($(this).attr('data-rel'));
         }
     });
 
-
-
     var simulationDriven = {
         init: function (arg) {
             var expId = arg.substr(4);
-            console.log('Experiments loaded: ' + simulationDriven.expLoaded);
-            /* 
+        /* 
           ToDO : Verify .js extension addition in all browsers
         */
             // if($.inArray( expId, simulationDriven.expLoaded))
@@ -67,13 +64,12 @@ socr.dataTable = function () {
         loadScript: function (id) {
             $.getScript('js/exp/' + id + '.js', function () {
                 simulationDriven.loadData(id)
-            })
+            });
         },
         loadData: function (id) {
-            console.log('loadData called ' + id)
             $.getJSON('js/exp/experiments.json', function (res) {
                 console.log(res.experiments);
-                for (i in res.experiments) {
+                for (var i in res.experiments) {
 
                     if (id == res.experiments[i].id) {
                         simulationDriven.displayText({
@@ -83,8 +79,8 @@ socr.dataTable = function () {
                         break;
                     }
                 }
-                simulationDriven.adjustModel(id)
-            })
+                simulationDriven.adjustModel(id);
+            });
         },
         adjustModel: function (id) {
             socr.exp.current = socr.exp[id];
@@ -114,8 +110,6 @@ socr.dataTable = function () {
 
     };
     //Settings
-
-
     var dragdrop = {
         init: function () {
 
@@ -149,7 +143,6 @@ socr.dataTable = function () {
 
     var tableparse = {
         init: function (url) {
-
             if (url.substr(0, 7) !== 'http://') {
                 url = 'http://' + url;
             }
@@ -157,7 +150,7 @@ socr.dataTable = function () {
               if(true){
                 url = "http://"+window.location.host+window.location.pathname+"/handler.php?url="+url;
                 tableparse.notify();
-                tableparse.request(url)
+                tableparse.request(url);
                 return true;
             }
             return false;
@@ -200,17 +193,14 @@ socr.dataTable = function () {
                 $dataTable.handsontable({
                     startCols: 8,
                     minSpareCols: 0
-                })
+                });
 
                 // var inputMethod = tableparse.mode() === 'sync' ? 'loadDataSwift' : 'loadData';
                 $dataTable.handsontable('loadData', matrix);
 
             }).fail(function () {
-
                 view.displayResponse('There was an error loadin the dataset', 'error')
-
-            })
-
+            });
 
         },
 
@@ -218,7 +208,7 @@ socr.dataTable = function () {
             var sizes = [];
             $(arrayOfTables).each(function (i) {
                 sizes.push([$(this).find('tr:last').index(), i])
-            })
+            });
             var maxIndex = 0;
             for (k = 0; k < sizes.length - 2; k++) {
                 if (sizes[k][0] < sizes[k + 1][0])
@@ -249,14 +239,14 @@ socr.dataTable = function () {
                 var row = [];
                 $(this).find('td').each(function () {
                     row.push($(this).text());
-                })
+                });
                 matrix.push(row);
             });
 
-        /*
-        Check if the table has th elements instead
-        @Todo
-        */
+            /*
+            Check if the table has th elements instead
+            @Todo
+            */
             if (matrix[0][0] === '') {
                 var row = [];
                 $stats.find('tr').filter(':eq(0)').find('th').each(function (i, v) {
@@ -268,8 +258,8 @@ socr.dataTable = function () {
             return matrix;
         },
         /*
-      Setter-Getter for mode toggling
-      */
+            Setter-Getter for mode toggling
+         */
         mode: function (option) {
             if (arguments.length) {
                 method = option;
@@ -280,10 +270,10 @@ socr.dataTable = function () {
         switchMode: function () {
             $('#fetchinstant').click(function () {
                 tableparse.mode('sync');
-            })
+            });
             $('#fetchasync').click(function () {
                 tableparse.mode('async');
-            })
+            });
         }
 
 
@@ -317,16 +307,14 @@ socr.dataTable = function () {
         editTitles: function () {
 
             var colHeader = $dataTable.handsontable('getColHeader');
-    
-
             var content = '<form class="form form-horizontal" id="input-titles"><fieldset><legend>Add titles to Spreadsheet</legend>';
+
             if (colHeader[0] !== '') {
                 for (var i = 0; i < colHeader.length; i++) {
                     // var label = (colHeader[i] !== '') ?  : '';
                     content += '<div class="control-group"><label class="control-label">Column ' + i + ' :</label><div class="controls"><input type="text" placeholder="Input field" value="' + colHeader[i] + '"></div></div>';
                 }
             } else {
-
                 var k = 0;
                 while (k < colHeader.length) {
                     content += '<div class="control-group"><label class="control-label">Title ' + k + '</label><div class="controls"><input type="text" placeholder="Input field"></div></div>';
@@ -343,7 +331,7 @@ socr.dataTable = function () {
             var titles = [];
             $('#input-titles').find('input[type="text"]').each(function () {
                 titles.push($(this).val());
-            })
+            });
             spreadSheet.addColHeaders(titles);
             $('#input-modal').modal('toggle');
             view.displayResponse('Titles altered successfully', 'success');
@@ -384,7 +372,7 @@ socr.dataTable = function () {
 
         }
 
-    }
+    };
     /*
     Hookups for spreadsheet opterations
     */
@@ -468,21 +456,7 @@ socr.dataTable = function () {
             socr.model.reset();
 
             $("#accordion").accordion("activate", 0);
-            
-            //LoadController called once when 'proceed' is clicked.
-            /*try {
-                $(this).update({
-                    to: 'dataDriven'
-                });
-            } catch (e) {
-                console.log(e)
-            } finally {
-                //$.update({to:'dataDriven'});
-                socr.controller.loadController({
-                    to: 'dataDriven',
-                    from: "spreadSheet"
-                });
-            }*/
+
 
             if (spreadSheet.validate(dataset)) {
                 // model.setDataset({
@@ -501,8 +475,6 @@ socr.dataTable = function () {
                 console.log("Dataset isn't valid")
                 // view.displayResponse(' There is some error in the dataset ', 'error');  
             }
-
-            // console.log(dataset);
         },
         refresh : function(){
              $dataTable.handsontable({});
@@ -518,9 +490,8 @@ socr.dataTable = function () {
            // [ startrow , startCol, endRow, endCol ]
           
             }
-           // var ht = $dataTable.handsontable('getInstance');
-           //      console.log(ht.getSelected());
-                console.log(selectedCoords);
+                
+            console.log(selectedCoords);
               if (selectedCoords) {
 
                 console.log(' Select Data request with  ' + selectedCoords)
@@ -541,7 +512,7 @@ socr.dataTable = function () {
                     //  model.setDataset({
 
                     //   data: dataset ,
-                    // //range:selected,
+                    //  ra nge:selected,
                     //   type: 'getSelected',
                     //   processed: false
 
@@ -574,17 +545,13 @@ socr.dataTable = function () {
         },
 
        sort : function(){
-            console.log(lastColselected);
- 
-              var d = $dataTable.handsontable('getData');
+            var d = $dataTable.handsontable('getData');
               /***
                 Matrix Form
                 row 1 
                 row 2
                ***/
-
             var sorted = d.sort(spreadSheet.compare);
-
             $dataTable.handsontable('loadData', sorted);
 
             //Empty The Spreadsheet
@@ -600,7 +567,6 @@ socr.dataTable = function () {
         },
 
         compare : function(a,b) {
-
           if (b[lastColselected] == '')
             return 1;
           if (a[lastColselected] == '')
@@ -628,7 +594,7 @@ socr.dataTable = function () {
                             $dataTable.handsontable('clear');
                             $dataTable.handsontable({
                                 colHeaders: []
-                            })
+                            });
                             $response.html('<div class="alert"><a class="close" data-dismiss="alert" href="#">x</a>Clear! Enter some value to get started!</div>'); //display the message in the status div below the done and reset buttons
                             $(this).dialog("close"); //close the confirmation window
                             // $dataTable.handsontable({'colHeaders' : false});
@@ -643,8 +609,7 @@ socr.dataTable = function () {
                     }
                 });
         }
-
-    }
+    };
 
     /*
     All member functions that involve selecting / highlighting
@@ -740,7 +705,7 @@ socr.dataTable = function () {
             stage.content = [];
             stage.showContent();
         }
-    }
+    };
     //General Pattern
     // stage.content = {
 
@@ -753,7 +718,7 @@ socr.dataTable = function () {
     resetStage.on('click', function (e) {
         e.preventDefault();
         stage.reset();
-    })
+    });
 
     var worldbank = {
         
@@ -786,7 +751,7 @@ socr.dataTable = function () {
             $('#worldbank-form').find('input[type="submit"]').attr('disabled', false);
             $('.worldbank-response').addClass('alert-error').html('There was an error requesting data');
         }
-    }
+    };
 
     $controls.find('input[value="Use Entire Dataset"]').on('click', spreadSheet.parseAll);
     $controls.find('.reset-spreadsheet').on('click', spreadSheet.reset);
@@ -799,7 +764,7 @@ socr.dataTable = function () {
     $dataTable.parent().on('mouseup', select.checkSelected);
     $('a.dragdrop').on('click', function () {
         $('#fetchURL').slideToggle();
-    })
+    });
 
     $controls.find('.edittitles').on('click', view.editTitles);
     $controls.find('.firstrowtitles').on('click', spreadSheet.firstRowTitles);
@@ -816,9 +781,6 @@ socr.dataTable = function () {
 
     });
 
-    // $('.handsontable').find('th').on('click', spreadSheet.setCol);
-    
-
     spreadSheet.init();
     dragdrop.init();
 
@@ -827,5 +789,5 @@ socr.dataTable = function () {
         spreadSheet: spreadSheet,
         view: view,
         worldbank : worldbank,
-    }
+    };
 }();
