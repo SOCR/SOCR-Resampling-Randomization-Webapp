@@ -7,7 +7,19 @@
 ###
 socr.controller = (model, view) ->
 
-  # PRIVATE PROPERTIES
+  # PRIVATE PROPERTIES  
+  __accordionDOMSelector__ = "#accordion"
+  __controllerBackBtnDOMSelector__ = ".controller-back"
+  __runBtnDOMSelector__ = "#runButton"
+  __stepBtnDOMSelector__ = "#stepButton"
+  __stopBtnDOMSelector__ = "#stopButton"
+  __resetBtnDOMSelector__ = "#resetButton"
+  __inferBtnDOMSelector__ = "#infer"
+
+  __inferenceDatasetIndexDOMSelector__ = "#index"
+  __inferenceVariableDOMSelector__ = "#variable"
+  __inferenceAnalysisDOMSelector__ = "#analysis"
+  __inferencePrecisionDOMSelector__ = '#result-precision'
 
   _id = 0 # Stores the id for setInterval in run mode
   _runsElapsed = 0 # Keeps count of number of resamples generated
@@ -154,7 +166,7 @@ socr.controller = (model, view) ->
     model.setK()
     $(".tooltips").tooltip()
 
-    $(".controller-back").on "click", (e) ->
+    $(__controllerBackBtnDOMSelector__).on "click", (e) ->
       e.preventDefault()
       try
         model.reset()
@@ -166,32 +178,32 @@ socr.controller = (model, view) ->
         console.log err.message
       return
 
-    $("#runButton").on "click", (e) ->
+    $(__runBtnDOMSelector__).on "click", (e) ->
       e.preventDefault()
       console.log "Run Started"      
       setTimeout socr.controller.run, 500
       return
 
-    $("#stepButton").on "click", (e) ->
+    $(__stepBtnDOMSelector__).on "click", (e) ->
       e.preventDefault()
       console.log "Step pressed "
       socr.controller.step()
       return
 
-    $("#stopButton").on "click", (e) ->
+    $(__stopBtnDOMSelector__).on "click", (e) ->
       e.preventDefault()
       console.log "Stop Pressed "
       socr.controller.stop()
       PubSub.publish "randomSampleGenerationInterrupted", {}
       return
 
-    $("#resetButton").on "click", (e) ->
+    $(__resetBtnDOMSelector__).on "click", (e) ->
       e.preventDefault()
       console.log "Reset pressed"
       socr.controller.reset()
       return
 
-    $("#infer").on "click", (e) ->
+    $(__inferBtnDOMSelector__).on "click", (e) ->
       e.preventDefault()
 
       if model.getSample(1) is false
@@ -203,21 +215,21 @@ socr.controller = (model, view) ->
                 
       return
 
-    $("#variable").on "change", ->
+    $(__inferenceVariableDOMSelector__).on "change", ->
       if $(this).val() is "Mean" or $(this).val() is "Count"
-        $("#index").attr "disabled", false
+        $(__inferenceDatasetIndexDOMSelector__).attr "disabled", false
       else
-        $("#index").attr "disabled", true
+        $(__inferenceDatasetIndexDOMSelector__).attr "disabled", true
       return
 
-    $("#analysis").on "change", ->
+    $(__inferenceAnalysisDOMSelector__).on "change", ->
       if socr.analysis[$(this).val()] isnt "undefined"
         el = ""
         $.each socr.analysis[$(this).val()]["variables"], (key, value) ->
           el += "<option value=\"" + value + "\">" + value.replace("-", " ") + "</option>"
           return
 
-        $("#variable").html el
+        $(__inferenceVariableDOMSelector__).html el
       return
 
     $(".update").on "click", ->
@@ -242,7 +254,7 @@ socr.controller = (model, view) ->
   @dependencies: view.animate()
   ###
   step: ->
-    $("#accordion").accordion "activate", 1
+    $(__accordionDOMSelector__).accordion "activate", 1
 
     #socr.view.toggleControllerHandle("hide");
     view.disableButtons() #disabling buttons
@@ -354,18 +366,20 @@ socr.controller = (model, view) ->
 
     return
 
-  setDotplot: (precision)->
-    $("#dotplot").html ""
-    index = parseInt($("#index").val())
-    precision = $('#result-precision').attr('checked')
-    if precision is "checked"
-      precision = 3
-    console.log "setdotplot started", "variable:" + $("#variable").val()
+  ###
+  @description : When user clicks "infer" button, setDotplot is triggered.
+  ###
+  setDotplot: (precision)->    
+    inferenceDatasetIndex = parseInt($(__inferenceDatasetIndexDOMSelector__).val())
+    inferencePrecision = $(__inferencePrecisionDOMSelector__).val() || 4
+    
+    console.log "setdotplot started", "variable:" + $(__inferenceVariableDOMSelector__).val()
+    
     model.setInferenceSettings
-      analysis: $("#analysis").val()
-      variable: $("#variable").val()
-      precision: precision
-      index: index
+      analysis: $(__inferenceAnalysisDOMSelector__).val()
+      variable: $(__inferenceVariableDOMSelector__).val()
+      precision: inferencePrecision
+      index: inferenceDatasetIndex
     return
 
   ###

@@ -605,25 +605,28 @@ socr.view = (model) ->
   ###
   @method: createDotPlot
   @description: Dot plot tab in the accordion is populated by this call.
-  Call invoked when "infer" button pressed in the controller tile.
+   "infer" button pressed in the controller tile -> appController -> appModel -> publishes "setInferenceSettingComplete".
   @return : {boolean}
   ###
   createDotplot: (setting) ->
+    __dotPlotDOMSelector__ = "#dotplot"
+    __accordionDOMSelector__ = "#accordion"
+
+    $(__dotPlotDOMSelector__).html ""
     throw new Error("invalid arguments: settings")  unless setting.variable?
     _currentVariable = setting.variable
-    $("#accordion").accordion "activate", 2
+    $(__accordionDOMSelector__).accordion "activate", 2
 
     # Function to get the Max value in Array
     Array.max = (array) ->
       Math.max.apply Math, array
-
 
     # Function to get the Min value in Array
     Array.min = (array) ->
       Math.min.apply Math, array
 
     setting.index--;
-    #setting.variable;
+
     switch setting.variable
       when "Mean"
         values = model.getMean(setting.index) #Mean values of all the generated random samples
@@ -723,9 +726,14 @@ socr.view = (model) ->
     #datum = Math.floor(datum*100) / 100;
     _currentValues = values
 
+    # fixing the precision
+    datum = Math.round( datum * Math.pow(10, setting.precision) ) / Math.pow(10, setting.precision)
+    lSide = Math.round( lSide * Math.pow(10, setting.precision) ) / Math.pow(10, setting.precision)
+    rSide = Math.round( rSide * Math.pow(10, setting.precision) ) / Math.pow(10, setting.precision)
+
     try
       dotplot = socr.vis.generate(
-        parent: "#dotplot"
+        parent: __dotPlotDOMSelector__
         data: values
         height: 390
         range: [
@@ -737,7 +745,6 @@ socr.view = (model) ->
         variable: setting.variable
         pl: lSide
         pr: rSide
-        precision:setting.precision
       )
 
     # nature: 'continuous'

@@ -9150,16 +9150,19 @@ SOCR - Statistical Online Computational Resource
       /*
       @method: createDotPlot
       @description: Dot plot tab in the accordion is populated by this call.
-      Call invoked when "infer" button pressed in the controller tile.
+       "infer" button pressed in the controller tile -> appController -> appModel -> publishes "setInferenceSettingComplete".
       @return : {boolean}
        */
       createDotplot: function(setting) {
-        var binNo, datum, dotplot, e, end, err, flag, index, lSide, pvalue, rSide, start, stop, temp, total, values;
+        var binNo, datum, dotplot, e, end, err, flag, index, lSide, pvalue, rSide, start, stop, temp, total, values, __accordionDOMSelector__, __dotPlotDOMSelector__;
+        __dotPlotDOMSelector__ = "#dotplot";
+        __accordionDOMSelector__ = "#accordion";
+        $(__dotPlotDOMSelector__).html("");
         if (setting.variable == null) {
           throw new Error("invalid arguments: settings");
         }
         _currentVariable = setting.variable;
-        $("#accordion").accordion("activate", 2);
+        $(__accordionDOMSelector__).accordion("activate", 2);
         Array.max = function(array) {
           return Math.max.apply(Math, array);
         };
@@ -9251,9 +9254,12 @@ SOCR - Statistical Online Computational Resource
         }
         binNo = ($("input[name=\"binno\"]").val() !== "" ? $("input[name=\"binno\"]").val() : 10);
         _currentValues = values;
+        datum = Math.round(datum * Math.pow(10, setting.precision)) / Math.pow(10, setting.precision);
+        lSide = Math.round(lSide * Math.pow(10, setting.precision)) / Math.pow(10, setting.precision);
+        rSide = Math.round(rSide * Math.pow(10, setting.precision)) / Math.pow(10, setting.precision);
         try {
           dotplot = socr.vis.generate({
-            parent: "#dotplot",
+            parent: __dotPlotDOMSelector__,
             data: values,
             height: 390,
             range: [start, stop],
@@ -9261,8 +9267,7 @@ SOCR - Statistical Online Computational Resource
             bins: binNo,
             variable: setting.variable,
             pl: lSide,
-            pr: rSide,
-            precision: setting.precision
+            pr: rSide
           });
         } catch (_error) {
           e = _error;
@@ -9459,7 +9464,18 @@ SOCR - Statistical Online Computational Resource
 
 (function() {
   socr.controller = function(model, view) {
-    var MIN_SAMPLE_GENERATION_STEP_COUNT, MIN_SAMPLE_GENERATION_STEP_TIME, _currentMode, _generate, _id, _noOfSteps, _runCount, _runsElapsed, _this;
+    var MIN_SAMPLE_GENERATION_STEP_COUNT, MIN_SAMPLE_GENERATION_STEP_TIME, __accordionDOMSelector__, __controllerBackBtnDOMSelector__, __inferBtnDOMSelector__, __inferenceAnalysisDOMSelector__, __inferenceDatasetIndexDOMSelector__, __inferencePrecisionDOMSelector__, __inferenceVariableDOMSelector__, __resetBtnDOMSelector__, __runBtnDOMSelector__, __stepBtnDOMSelector__, __stopBtnDOMSelector__, _currentMode, _generate, _id, _noOfSteps, _runCount, _runsElapsed, _this;
+    __accordionDOMSelector__ = "#accordion";
+    __controllerBackBtnDOMSelector__ = ".controller-back";
+    __runBtnDOMSelector__ = "#runButton";
+    __stepBtnDOMSelector__ = "#stepButton";
+    __stopBtnDOMSelector__ = "#stopButton";
+    __resetBtnDOMSelector__ = "#resetButton";
+    __inferBtnDOMSelector__ = "#infer";
+    __inferenceDatasetIndexDOMSelector__ = "#index";
+    __inferenceVariableDOMSelector__ = "#variable";
+    __inferenceAnalysisDOMSelector__ = "#analysis";
+    __inferencePrecisionDOMSelector__ = '#result-precision';
     _id = 0;
     _runsElapsed = 0;
     _runCount = 0;
@@ -9570,7 +9586,7 @@ SOCR - Statistical Online Computational Resource
         var e;
         model.setK();
         $(".tooltips").tooltip();
-        $(".controller-back").on("click", function(e) {
+        $(__controllerBackBtnDOMSelector__).on("click", function(e) {
           var err;
           e.preventDefault();
           try {
@@ -9584,28 +9600,28 @@ SOCR - Statistical Online Computational Resource
             console.log(err.message);
           }
         });
-        $("#runButton").on("click", function(e) {
+        $(__runBtnDOMSelector__).on("click", function(e) {
           e.preventDefault();
           console.log("Run Started");
           setTimeout(socr.controller.run, 500);
         });
-        $("#stepButton").on("click", function(e) {
+        $(__stepBtnDOMSelector__).on("click", function(e) {
           e.preventDefault();
           console.log("Step pressed ");
           socr.controller.step();
         });
-        $("#stopButton").on("click", function(e) {
+        $(__stopBtnDOMSelector__).on("click", function(e) {
           e.preventDefault();
           console.log("Stop Pressed ");
           socr.controller.stop();
           PubSub.publish("randomSampleGenerationInterrupted", {});
         });
-        $("#resetButton").on("click", function(e) {
+        $(__resetBtnDOMSelector__).on("click", function(e) {
           e.preventDefault();
           console.log("Reset pressed");
           socr.controller.reset();
         });
-        $("#infer").on("click", function(e) {
+        $(__inferBtnDOMSelector__).on("click", function(e) {
           e.preventDefault();
           if (model.getSample(1) === false) {
             view.handleResponse("<h4 class=\"alert-heading\">No Random samples to infer From!</h4>Please generate some random samples in Step 2. ", "error", "controller-content");
@@ -9617,21 +9633,21 @@ SOCR - Statistical Online Computational Resource
             setTimeout(socr.controller.setDotplot, 500);
           }
         });
-        $("#variable").on("change", function() {
+        $(__inferenceVariableDOMSelector__).on("change", function() {
           if ($(this).val() === "Mean" || $(this).val() === "Count") {
-            $("#index").attr("disabled", false);
+            $(__inferenceDatasetIndexDOMSelector__).attr("disabled", false);
           } else {
-            $("#index").attr("disabled", true);
+            $(__inferenceDatasetIndexDOMSelector__).attr("disabled", true);
           }
         });
-        $("#analysis").on("change", function() {
+        $(__inferenceAnalysisDOMSelector__).on("change", function() {
           var el;
           if (socr.analysis[$(this).val()] !== "undefined") {
             el = "";
             $.each(socr.analysis[$(this).val()]["variables"], function(key, value) {
               el += "<option value=\"" + value + "\">" + value.replace("-", " ") + "</option>";
             });
-            $("#variable").html(el);
+            $(__inferenceVariableDOMSelector__).html(el);
           }
         });
         $(".update").on("click", function() {
@@ -9659,7 +9675,7 @@ SOCR - Statistical Online Computational Resource
        */
       step: function() {
         var e;
-        $("#accordion").accordion("activate", 1);
+        $(__accordionDOMSelector__).accordion("activate", 1);
         view.disableButtons();
         try {
           model.generateSample();
@@ -9757,20 +9773,20 @@ SOCR - Statistical Online Computational Resource
           }
         });
       },
+
+      /*
+      @description : When user clicks "infer" button, setDotplot is triggered.
+       */
       setDotplot: function(precision) {
-        var index;
-        $("#dotplot").html("");
-        index = parseInt($("#index").val());
-        precision = $('#result-precision').attr('checked');
-        if (precision === "checked") {
-          precision = 3;
-        }
-        console.log("setdotplot started", "variable:" + $("#variable").val());
+        var inferenceDatasetIndex, inferencePrecision;
+        inferenceDatasetIndex = parseInt($(__inferenceDatasetIndexDOMSelector__).val());
+        inferencePrecision = $(__inferencePrecisionDOMSelector__).val() || 4;
+        console.log("setdotplot started", "variable:" + $(__inferenceVariableDOMSelector__).val());
         model.setInferenceSettings({
-          analysis: $("#analysis").val(),
-          variable: $("#variable").val(),
-          precision: precision,
-          index: index
+          analysis: $(__inferenceAnalysisDOMSelector__).val(),
+          variable: $(__inferenceVariableDOMSelector__).val(),
+          precision: inferencePrecision,
+          index: inferenceDatasetIndex
         });
       },
 
@@ -23458,7 +23474,6 @@ if (!Array.prototype.filter) {
 
 })(jQuery, window, Handsontable);
 $(document).ready(function(){
-    debugger
     socr.dataTable = (function () {
         $dataTable = $('#input');
         var $controls = $('section.controls');
